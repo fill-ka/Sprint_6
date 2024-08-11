@@ -1,13 +1,10 @@
 from pages.order_scooter import OrderPage
 import pytest
 import allure
-import locators.order_locators as loc
 from locators.url import url
 from locators.order_test_data import date, comment
 
-
 class TestOrderScooter:
-    driver = None
 
     @allure.title('Проверка успешного заказа самоката по клику на кнопку "Заказать" вверху страницы')
     @pytest.mark.parametrize('name, surname, metro, phone_number, address',
@@ -15,23 +12,9 @@ class TestOrderScooter:
                               ['Юлия', 'Галкина', 'Спартак', '89250659797', 'Ул. Летчика Бабушкина, д.2']])
     def test_order_button_top(self, name, surname, metro, phone_number, address, start_and_stop_browser):
         order_page = OrderPage(start_and_stop_browser)
-        order_page.open_site(url)
-        order_page.click_cookie_button(loc.button_accept_cookies)
-
-        order_page.wait_and_click(loc.button_order_small)
-        order_page.fill_customer_info(loc.input_name, name, loc.input_surname, surname, loc.input_address, address,
-                                      loc.input_phone, phone_number, loc.input_metro_station, metro)
-
-        order_page.click_and_wait_for_element(loc.button_next_step, loc.header_about_rent)
-        order_page.fill_rental_info(loc.dropdown_rent_duration, loc.option_one_day, loc.checkbox_black_scooter,
-                                    loc.input_rent_date, date, loc.input_comment, comment)
-
-        order_page.confirm_order(loc.button_order_medium, loc.button_confirm_yes, loc.button_check_status)
-
-        order_page.click_element(loc.logo_main_scooter)
-        order_page.wait_for_element_visible(loc.header_scooter_main)
-
-        assert 'на пару дней' and 'Самокат' in order_page.get_element_text(loc.header_scooter_main)
+        order_page.open_and_accept_cookies(url)
+        order_page.order_via_top_button(name, surname, address, phone_number, metro, date, comment)
+        assert order_page.verify_return_to_main_page()
 
     @allure.title('Проверка успешного заказа самоката по клику на кнопку "Заказать" внизу страницы')
     @pytest.mark.parametrize('name, surname, metro, phone_number, address',
@@ -39,19 +22,28 @@ class TestOrderScooter:
                               ['Егор', 'Воловик', 'Коньково', '89153276263', 'Ул. Арбатская, д.3']])
     def test_order_button_below(self, name, surname, metro, phone_number, address, start_and_stop_browser):
         order_page = OrderPage(start_and_stop_browser)
-        order_page.open_site(url)
+        order_page.open_and_accept_cookies(url)
+        order_page.order_via_bottom_button(name, surname, address, phone_number, metro, date, comment)
+        assert order_page.verify_order_success()
 
-        order_page.click_cookie_button(loc.button_accept_cookies)
-        order_page.scroll_and_click(loc.button_order_large)
-        order_page.fill_customer_info(loc.input_name, name, loc.input_surname, surname, loc.input_address, address,
-                                      loc.input_phone, phone_number, loc.input_metro_station, metro)
+    @allure.title('Проверка перехода на главную страницу при нажатии на логотип «Самоката»')
+    def test_logo_scooter_redirect(self, start_and_stop_browser):
+        order_page = OrderPage(start_and_stop_browser)
+        order_page.open_and_accept_cookies(url)
 
-        order_page.click_and_wait_for_element(loc.button_next_step, loc.header_about_rent)
-        order_page.fill_rental_info(loc.dropdown_rent_duration, loc.option_one_day, loc.checkbox_black_scooter,
-                                    loc.input_rent_date, date, loc.input_comment, comment)
+        order_page.verify_return_to_main_page()
 
-        order_page.click_element(loc.button_order_medium)
-        order_page.click_element(loc.button_confirm_yes)
+        assert 'Самокат' in order_page.get_element_text(order_page.header_scooter_main)
 
-        assert "Заказ оформлен" in order_page.get_element_text(loc.message_order_success)
+    @allure.title('Проверка открытия главной страницы Дзена в новом окне при нажатии на логотип Яндекса')
+    def test_logo_yandex_redirect(self, start_and_stop_browser):
+        order_page = OrderPage(start_and_stop_browser)
+        order_page.open_and_accept_cookies(url)
 
+        order_page.click_element(order_page.logo_yandex_main)
+
+        order_page.switch_to_new_window()
+
+        order_page.wait_for_element_visible(order_page.dzen_main_page_header)
+
+        assert 'dzen.ru' in order_page.get_current_url()
