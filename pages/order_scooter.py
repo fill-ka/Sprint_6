@@ -1,6 +1,5 @@
 import allure
 from selenium.webdriver.common.keys import Keys
-import time
 from pages.base_page import BasePage
 
 class OrderPage(BasePage):
@@ -37,7 +36,7 @@ class OrderPage(BasePage):
         self.fill_input(surname_locator, surname)
         self.fill_input(address_locator, address)
         self.fill_input(phone_locator, phone)
-        time.sleep(2)
+        self.wait_for_element_clickable(metro_locator)
         metro_input = self.driver.find_element(*metro_locator)
         metro_input.send_keys(metro)
         metro_input.send_keys(Keys.ARROW_DOWN)
@@ -72,5 +71,5 @@ class OrderPage(BasePage):
     def go_to_dzen(self, yandex_logo_locator, dzen_button_locator):
         self.click_element(yandex_logo_locator)
         self.driver.close()
-        self.driver.switch_to.window(self.driver.window_handles[0])
+        self.driver.switch_to.window()
         self.wait_for_element_clickable(dzen_button_locator)
