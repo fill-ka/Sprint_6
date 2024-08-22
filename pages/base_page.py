@@ -59,6 +59,10 @@ class BasePage:
         new_window = self.driver.window_handles[-1]
         self.driver.switch_to.window(new_window)
 
+    @allure.step("Закрытие текущего окна")
+    def close_current_window(self):
+        self.driver.close()
+
     @allure.step("Получение текущего url")
     def get_current_url(self):
         return self.driver.current_url

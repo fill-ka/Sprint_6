@@ -27,7 +27,7 @@ class OrderPage(BasePage):
 
     @allure.step("Выбор цвета самоката: {locator}")
     def select_scooter_color(self, locator):
-        self.driver.find_element(*locator).click()
+        self.click_element(locator)
 
     @allure.step("Заполнение информации о заказчике: имя - {name}, фамилия - {surname}, адрес - {address}, телефон - {phone}, метро - {metro}")
     def fill_customer_info(self, name_locator, name, surname_locator, surname, address_locator, address,
@@ -70,6 +70,6 @@ class OrderPage(BasePage):
     @allure.step("Переход на Дзен через логотип Яндекса")
     def go_to_dzen(self, yandex_logo_locator, dzen_button_locator):
         self.click_element(yandex_logo_locator)
-        self.driver.close()
-        self.driver.switch_to.window()
+        self.close_current_window()
+        self.switch_to_new_window()
         self.wait_for_element_clickable(dzen_button_locator)
